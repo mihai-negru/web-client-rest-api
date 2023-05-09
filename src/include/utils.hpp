@@ -4,8 +4,8 @@
 
 namespace pcom {
     class Client;
-    class Command;
-    class Socket;
+    class InputCommand;
+    class TcpSocket;
     class HttpHandler;
     class Errors;
 }

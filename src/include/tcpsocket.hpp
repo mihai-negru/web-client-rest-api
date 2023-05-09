@@ -2,6 +2,6 @@
 
 #include "./utils.hpp"
 
-class pcom::Command {
+class pcom::TcpSocket {
 
 };

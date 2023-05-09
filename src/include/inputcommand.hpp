@@ -2,6 +2,6 @@
 
 #include "./utils.hpp"
 
-class pcom::Socket {
+class pcom::InputCommand {
 
 };
