@@ -9,6 +9,91 @@ pcom::HttpHandler::HttpHandler() {
     clear();
 }
 
+pcom::HttpHandler& pcom::HttpHandler::set_host_ip(std::string host_ip) {
+    this->host_ip = host_ip;
+
+    return *this;
+}
+
+pcom::HttpHandler& pcom::HttpHandler::set_host_url(std::string host_url) {
+    this->host_url = host_url;
+
+    return *this;
+}
+
+pcom::HttpHandler& pcom::HttpHandler::set_queries(std::string queries) {
+    this->queries = queries;
+
+    return *this;
+}
+
+pcom::HttpHandler& pcom::HttpHandler::set_cookies(std::string cookies) {
+    this->cookies = cookies;
+
+    return *this;
+}
+
+pcom::HttpHandler& pcom::HttpHandler::set_content_type(std::string content_type) {
+    this->content_type = content_type;
+
+    return *this;
+}
+
+pcom::HttpHandler& pcom::HttpHandler::set_body(std::string body) {
+    this->body = body;
+    body_complete = true;
+
+    return *this;
+}
+
+pcom::HttpHandler& pcom::HttpHandler::generate_get_request() {
+    if ((host_url.empty()) || (host_ip.empty())) {
+        throw pcom::Errors("Could not generate GET request because of null fields.");
+    }
+
+    header.clear();
+
+    if (!queries.empty()) {
+        header = "GET " + host_url + "?" + queries + " HTTP/1.1\r\n";
+    } else {
+        header = "GET " + host_url + " HTTP/1.1\r\n";
+    }
+
+    header += "Host: " + host_ip + "\r\n";
+
+    if (!cookies.empty()) {
+        header += "Cookie: " + cookies + "\r\n";
+    }
+
+    header += "\r\n";
+
+    header_complete = true;
+
+    return *this;
+}
+
+pcom::HttpHandler& pcom::HttpHandler::generate_post_request() {
+    if ((host_url.empty()) || (host_ip.empty()) || (content_type.empty())) {
+        throw pcom::Errors("Could not generate POST request because of null fields.");
+    }
+
+    header.clear();
+
+    header = "POST " + host_url + " HTTP/1.1\r\n";
+    header += "Host: " + host_ip + "\r\n" + "Content-Type: " + content_type + "\r\n";
+    
+    if (!cookies.empty()) {
+        header += "Cookie: " + cookies + "\r\n";
+    }
+
+    content_length = body.size();
+    header += "Content-Length: " + std::to_string(content_length) + "\r\n\r\n";
+
+    header_complete = true;
+
+    return *this;
+}
+
 void pcom::HttpHandler::add_bytes(const char* bytes, const size_t bytes_len) {
     if (header_complete == true) {
         size_t append_bytes = content_length - body.size();
@@ -39,7 +124,7 @@ void pcom::HttpHandler::add_bytes(const char* bytes, const size_t bytes_len) {
                 header_complete = true;
                 add_bytes(bytes + header_end, bytes_len - header_end + 1);
             } else {
-                throw pcom::Errors("Could not find the content length in the header.");
+                content_length = 0;
             }
         } else {
             header.append(bytes, bytes_len);
@@ -78,4 +163,9 @@ void pcom::HttpHandler::clear() {
     header_complete = false;
     body_complete = false;
     content_length = 0;
+    host_ip.clear();
+    host_url.clear();
+    queries.clear();
+    content_type.clear();
+    cookies.clear();
 }

@@ -12,9 +12,24 @@ class pcom::HttpHandler {
         bool header_complete;
         bool body_complete;
         size_t content_length;
+        std::string host_ip;
+        std::string host_url;
+        std::string queries;
+        std::string content_type;
+        std::string cookies;
 
     public:
         HttpHandler();
+
+        HttpHandler& set_host_ip(std::string host_ip);
+        HttpHandler& set_host_url(std::string host_url);
+        HttpHandler& set_queries(std::string queries);
+        HttpHandler& set_cookies(std::string cookies);
+        HttpHandler& set_content_type(std::string content_type);
+        HttpHandler& set_body(std::string body);
+
+        HttpHandler& generate_get_request();
+        HttpHandler& generate_post_request();
 
         void add_bytes(const char* bytes, const size_t bytes_len);
         
