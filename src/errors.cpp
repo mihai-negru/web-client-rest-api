@@ -1,7 +1,7 @@
 #include "./include/errors.hpp"
 
-pcom::Errors::Errors(char *msg) : err_msg(msg) {}
+pcom::Errors::Errors(const char *msg) : err_msg(msg) {}
 
-char* pcom::Errors::what() {
+const char* pcom::Errors::what() {
     return err_msg;
 }
