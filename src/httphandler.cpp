@@ -148,7 +148,7 @@ char* pcom::HttpHandler::byte_stream() {
     std::string dummy(header);
 
     if (body_complete == true) {
-        dummy.append(body);
+        dummy += body;
     }
 
     char *dummy_c_str = new char[dummy.size() + 1];

@@ -4,10 +4,10 @@
 
 class pcom::Errors : public std::exception {
     private:
-    const char *err_msg;
+    std::string err_msg;
 
     public:
     Errors(const char *msg);
 
-    const char *what();
+    const std::string what();
 };

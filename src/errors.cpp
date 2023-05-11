@@ -1,7 +1,11 @@
 #include "./include/errors.hpp"
 
-pcom::Errors::Errors(const char *msg) : err_msg(msg) {}
+pcom::Errors::Errors(const char *msg) {
+    err_msg = "\033[0;31m[ERROR]: ";
+    err_msg += msg;
+    err_msg += "\033[0m\n"; 
+}
 
-const char* pcom::Errors::what() {
+const std::string pcom::Errors::what() {
     return err_msg;
 }
