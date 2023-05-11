@@ -18,6 +18,7 @@ class pcom::HttpHandler {
         std::string content_type;
         std::string cookies;
         std::string token;
+        int status_code;
 
     public:
         HttpHandler();

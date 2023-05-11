@@ -27,6 +27,7 @@ class pcom::InputCommand {
         void listen_for_command();
 
         std::string get_command_body();
+        json get_command_raw();
         Command get_command_type();
 
     private:

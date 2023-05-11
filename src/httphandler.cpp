@@ -109,11 +109,6 @@ int pcom::HttpHandler::get_status_code() {
         throw pcom::Errors("Header is not complete for reading status.");
     }
 
-    std::stringstream stream(header.substr(9, 3));
-
-    int status_code = 0;
-    stream >> status_code;
-
     return status_code;
 }
 
@@ -141,6 +136,9 @@ std::string pcom::HttpHandler::extract_cookies() {
 
 void pcom::HttpHandler::add_bytes(const char* bytes, const size_t bytes_len) {
     if (header_complete == true) {
+        std::stringstream stream(header.substr(9, 3));
+        stream >> status_code;
+
         size_t append_bytes = content_length > body.size() ? content_length - body.size() : 0;
 
         if (bytes_len < append_bytes) {
@@ -221,4 +219,5 @@ void pcom::HttpHandler::clear() {
     content_type.clear();
     cookies.clear();
     token.clear();
+    status_code = 0;
 }

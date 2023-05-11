@@ -21,6 +21,7 @@ class pcom::Client {
         void handle_login_request();
         void handle_enter_library_request();
         void handle_get_books_request();
+        void handle_get_book_request();
         void handle_logout_request();
     
     public:

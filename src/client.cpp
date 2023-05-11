@@ -122,7 +122,7 @@ void pcom::Client::handle_get_books_request() {
     size_t books_count = books.size();
 
     if (books_count == 0) {
-        std::cout << GREEN_COLOR << "[OK] No books found in library\n\n" << RESET_COLOR;
+        std::cout << GREEN_COLOR << "[OK] No books found in the library\n\n" << RESET_COLOR;
     } else {
         size_t books_to_print = 0;
 
@@ -156,6 +156,42 @@ void pcom::Client::handle_get_books_request() {
             }
         }
     }
+}
+
+void pcom::Client::handle_get_book_request() {
+    if (!has_library_access) {
+        throw pcom::Errors("Client does not have access to the library.");
+    }
+
+    std::string book_id = std::to_string((int)cmdhandler.get_command_raw()["id"]);
+
+    httphandler.clear();
+
+    httphandler
+        .set_host_url(urls[pcom::InputCommand::Command::GET_BOOK] + book_id)
+        .set_content_type("application/json")
+        .set_authorization(library_token)
+        .generate_get_request();
+
+    tcpsock.open_connection();
+    tcpsock.send_stream(httphandler);
+    tcpsock.recv_stream(httphandler);
+
+    if (httphandler.get_status_code() == 404) {
+        std::cout << GREEN_COLOR << "[OK] No book matches the id from the library.\n\n" << RESET_COLOR;
+        return;
+    } else if (httphandler.get_status_code() != 200) {
+        throw pcom::Errors("Library token is depricated on getting book.");
+    }
+
+    json book = json::parse(httphandler.get_body());
+
+    std::cout << "Book info:\n";
+    std::cout << "  Title: " << book["title"] << '\n';
+    std::cout << "  Author: " << book["author"] << '\n';
+    std::cout << "  Publisher: " << book["publisher"] << '\n';
+    std::cout << "  Genre: " << book["genre"] << '\n';
+    std::cout << "  Page Count: " << book["page_count"] << "\n\n";
 }
 
 void pcom::Client::handle_logout_request() {
@@ -211,7 +247,9 @@ void pcom::Client::start_session() {
                 case pcom::InputCommand::Command::GET_BOOKS:
                     handle_get_books_request();
                     break;
-                // case pcom::InputCommand::Command::GET_BOOK:
+                case pcom::InputCommand::Command::GET_BOOK:
+                    handle_get_book_request();
+                    break;
                 // case pcom::InputCommand::Command::ADD_BOOK:
                 // case pcom::InputCommand::Command::DELETE_BOOK:
                 //     if (!has_library_access) {

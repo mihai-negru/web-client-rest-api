@@ -28,6 +28,14 @@ std::string pcom::InputCommand::get_command_body() {
     return body.dump();
 }
 
+json pcom::InputCommand::get_command_raw() {
+    if (body.empty()) {
+        throw pcom::Errors("Could not return an empty json.");
+    }
+
+    return body;
+}
+
 pcom::InputCommand::Command pcom::InputCommand::get_command_type() {
     return type;
 }

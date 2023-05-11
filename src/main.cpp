@@ -15,7 +15,7 @@ int main(void) {
     host_urls[pcom::InputCommand::Command::GET_BOOKS] = "/api/v1/tema/library/books";
     host_urls[pcom::InputCommand::Command::GET_BOOK] = "/api/v1/tema/library/books/";
     host_urls[pcom::InputCommand::Command::ADD_BOOK] = "/api/v1/tema/library/books";
-    host_urls[pcom::InputCommand::Command::DELETE_BOOK] = "/api/v1/tema/library/books";
+    host_urls[pcom::InputCommand::Command::DELETE_BOOK] = "/api/v1/tema/library/books/";
     host_urls[pcom::InputCommand::Command::LOGOUT] = "/api/v1/tema/auth/logout";
 
     /* Initialize and client and start the session */
