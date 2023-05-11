@@ -16,6 +16,7 @@ void pcom::InputCommand::listen_for_command() {
         throw pcom::Errors("Invalid format for a command.");
     }
 
+    body.clear();
     parse_command(input);
 }
 

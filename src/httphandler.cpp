@@ -33,6 +33,12 @@ pcom::HttpHandler& pcom::HttpHandler::set_cookies(std::string cookies) {
     return *this;
 }
 
+pcom::HttpHandler& pcom::HttpHandler::set_authorization(std::string token) {
+    this->token = token;
+
+    return *this;
+}
+
 pcom::HttpHandler& pcom::HttpHandler::set_content_type(std::string content_type) {
     this->content_type = content_type;
 
@@ -51,8 +57,6 @@ pcom::HttpHandler& pcom::HttpHandler::generate_get_request() {
         throw pcom::Errors("Could not generate GET request because of null fields.");
     }
 
-    header.clear();
-
     if (!queries.empty()) {
         header = "GET " + host_url + "?" + queries + " HTTP/1.1\r\n";
     } else {
@@ -60,6 +64,10 @@ pcom::HttpHandler& pcom::HttpHandler::generate_get_request() {
     }
 
     header += "Host: " + host_ip + "\r\n";
+
+    if (!token.empty()) {
+        header += "Authorization: Bearer " + token + "\r\n";
+    }
 
     if (!cookies.empty()) {
         header += "Cookie: " + cookies + "\r\n";
@@ -77,11 +85,13 @@ pcom::HttpHandler& pcom::HttpHandler::generate_post_request() {
         throw pcom::Errors("Could not generate POST request because of null fields.");
     }
 
-    header.clear();
-
     header = "POST " + host_url + " HTTP/1.1\r\n";
     header += "Host: " + host_ip + "\r\n" + "Content-Type: " + content_type + "\r\n";
     
+    if (!token.empty()) {
+        header += "Authorization: Bearer " + token + "\r\n";
+    }
+
     if (!cookies.empty()) {
         header += "Cookie: " + cookies + "\r\n";
     }
@@ -94,22 +104,58 @@ pcom::HttpHandler& pcom::HttpHandler::generate_post_request() {
     return *this;
 }
 
+int pcom::HttpHandler::get_status_code() {
+    if (!header_complete) {
+        throw pcom::Errors("Header is not complete for reading status.");
+    }
+
+    std::stringstream stream(header.substr(9, 3));
+
+    int status_code = 0;
+    stream >> status_code;
+
+    return status_code;
+}
+
+std::string pcom::HttpHandler::extract_cookies() {
+    if (!header_complete) {
+        throw pcom::Errors("Header is not complete for reading cookies.");
+    }
+
+    std::size_t cookies_start = header.find("Set-Cookie: ");
+
+    if (cookies_start == std::string::npos) {
+        throw pcom::Errors("Could not find the cookies in the header.");
+    }
+
+    cookies_start += 12;
+
+    std::size_t cookies_end = header.rfind(';');
+
+    if (cookies_end == std::string::npos) {
+        throw pcom::Errors("Cookies format is wrong, cannot read cookies.");
+    }
+
+    return header.substr(cookies_start, cookies_end - cookies_start + 1);
+}
+
 void pcom::HttpHandler::add_bytes(const char* bytes, const size_t bytes_len) {
     if (header_complete == true) {
-        size_t append_bytes = content_length - body.size();
+        size_t append_bytes = content_length > body.size() ? content_length - body.size() : 0;
 
-        if (bytes_len <= append_bytes) {
+        if (bytes_len < append_bytes) {
             body.append(bytes, bytes_len);
         } else {
             body_complete = true;
             body.append(bytes, append_bytes);
         }
     } else {
-        std::string dummy(bytes);
+        std::string dummy(bytes, bytes_len);
 
         std::size_t header_end = dummy.find(HEADER_TERMINATOR);
 
         if (header_end != std::string::npos) {
+            header_complete = true;
             header_end += HEADER_TERMINATOR_SIZE;
             header.append(dummy.substr(0, header_end));
 
@@ -121,8 +167,7 @@ void pcom::HttpHandler::add_bytes(const char* bytes, const size_t bytes_len) {
                 std::stringstream stream(dummy.substr(content_length_start));
                 stream >> content_length;
 
-                header_complete = true;
-                add_bytes(bytes + header_end, bytes_len - header_end + 1);
+                add_bytes(bytes + header_end, bytes_len - header_end);
             } else {
                 content_length = 0;
             }
@@ -157,15 +202,23 @@ char* pcom::HttpHandler::byte_stream() {
     return dummy_c_str;
 }
 
+std::string pcom::HttpHandler::get_body() {
+    if(!body_complete) {
+        throw pcom::Errors("Body is not completed for reading.");
+    }
+
+    return body;
+}
+
 void pcom::HttpHandler::clear() {
     header.clear();
     body.clear();
     header_complete = false;
     body_complete = false;
     content_length = 0;
-    host_ip.clear();
     host_url.clear();
     queries.clear();
     content_type.clear();
     cookies.clear();
+    token.clear();
 }

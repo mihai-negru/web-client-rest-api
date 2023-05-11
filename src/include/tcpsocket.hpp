@@ -19,17 +19,17 @@
 class pcom::TcpSocket {
     private:
         int fd;
+        struct sockaddr_in addr;
 
     public:
         TcpSocket(
             const char *host_ip,
-            uint16_t host_port,
-            int ip_type,
-            int socket_type,
-            int flag
+            uint16_t host_port
         );
-        ~TcpSocket();
 
+        void open_connection();
         void send_stream(HttpHandler& handler);
         void recv_stream(HttpHandler& handler);
+
+        ~TcpSocket();
 };

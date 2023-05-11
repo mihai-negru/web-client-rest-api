@@ -17,6 +17,7 @@ class pcom::HttpHandler {
         std::string queries;
         std::string content_type;
         std::string cookies;
+        std::string token;
 
     public:
         HttpHandler();
@@ -25,11 +26,15 @@ class pcom::HttpHandler {
         HttpHandler& set_host_url(std::string host_url);
         HttpHandler& set_queries(std::string queries);
         HttpHandler& set_cookies(std::string cookies);
+        HttpHandler& set_authorization(std::string token);
         HttpHandler& set_content_type(std::string content_type);
         HttpHandler& set_body(std::string body);
 
         HttpHandler& generate_get_request();
         HttpHandler& generate_post_request();
+
+        int get_status_code();
+        std::string extract_cookies();
 
         void add_bytes(const char* bytes, const size_t bytes_len);
         
@@ -39,6 +44,7 @@ class pcom::HttpHandler {
         size_t get_body_size();
         
         char* byte_stream();
+        std::string get_body();
         
         void clear();
 };

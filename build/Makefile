@@ -4,7 +4,6 @@ CFLAGS 		:= 	-std=c++17 -g -Wall -Wextra
 VALGRIND	:= valgrind
 VAL_FLAGS	:= --leak-check=full \
 			   --show-leak-kinds=all \
-			   --track-origins=yes \
 			   -s
 
 RM			:= 	rm
