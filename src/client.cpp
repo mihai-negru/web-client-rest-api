@@ -14,7 +14,6 @@ tcpsock(host_ip, host_port),
 httphandler(),
 cmdhandler(),
 urls(urls) {
-
     httphandler.set_host_ip(host_ip);
     is_logged_in = false;
     has_library_access = false;
@@ -131,7 +130,8 @@ void pcom::Client::handle_get_books_request() {
     std::string dummy;
 
     while (is_invalid_number) {
-        std::cout << GREEN_COLOR << "How many books to print out of <" << books_count << ">? --> " << RESET_COLOR;
+        std::cout << GREEN_COLOR << "How many books to print out of <" << 
+                     books_count << ">? --> " << RESET_COLOR;
         std::getline(std::cin, dummy);
 
         if ((!dummy.empty()) &&(dummy.find_first_not_of("0123456789") == std::string::npos)) {

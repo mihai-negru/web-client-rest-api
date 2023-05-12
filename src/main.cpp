@@ -23,7 +23,6 @@ int main(void) {
         pcom::Client client = pcom::Client(host_ip, host_port, host_urls);
 
         client.start_session();
-
     } catch(pcom::Errors& err) {
         std::cout << err.what() << '\n';
     }
