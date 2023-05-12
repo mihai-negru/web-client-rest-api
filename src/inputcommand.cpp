@@ -82,7 +82,7 @@ void pcom::InputCommand::parse_command(std::string command) {
         handle_exit_cmd();
     } else {
         type = UNKNOWN;
-
+        std::cout << '\n';
         throw pcom::Errors("Unknown input command.");
     }
 }

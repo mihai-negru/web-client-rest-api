@@ -12,30 +12,40 @@ RFLAGS		:= 	-rf
 ZIP			:=	zip
 ZIP_NAME	:=	323CD_Negru_Mihai_Tema3.zip
 ZIP_FLAGS	:= -r
-ZIP_FILES	:= 	src/ build/ README.md
+ZIP_FILES	:= 	src/ Makefile README.md
 
-SRC			:= 	../src
+SRC			:= 	src
 SRC_FILES	:= $(wildcard $(SRC)/*.cpp)
 
+INCLUDE		:= $(SRC)/include
+
+BUILD		:= build
+
 EXEC		:= 	main
-O_FILES		:= 	$(patsubst $(SRC)/%.cpp,%.o,$(SRC_FILES))
+O_FILES		:= 	$(patsubst $(SRC)/%.cpp,$(BUILD)/%.o,$(SRC_FILES))
 
-all: $(EXEC) clean_o
+all: create_dir $(EXEC)
 
-%.o: $(SRC)/%.cpp
-	@$(CC) $(CFLAGS) -c $<
+create_dir:
+	@if [ ! -d $(BUILD) ]; then mkdir -p $(BUILD); fi
+
+$(BUILD)/%.o: $(SRC)/%.cpp
+	@$(CC) $(CFLAGS) -o $@ -c $<
 
 $(EXEC): $(O_FILES)
 	@$(CC) $^ -o $@
 
-val: $(EXEC) clean_o
+val: $(EXEC)
 	@$(VALGRIND) $(VAL_FLAGS) ./$(EXEC)
+
+run: $(EXEC)
+	@./$(EXEC)
 
 zip_project: $(ZIP_FILES)
 	@$(ZIP) $(ZIP_FLAGS) $(ZIP_NAME) $(ZIP_FILES)
 
 clean:
-	@$(RM) $(RFLAGS) $(EXEC) $(O_FILES)
+	@$(RM) $(RFLAGS) $(EXEC) $(BUILD)
 
-clean_o:
-	@$(RM) $(RFLAGS) $(O_FILES)
+clean_build:
+	@$(RM) $(RFLAGS) $(BUILD)
