@@ -60,7 +60,7 @@ void pcom::Client::handle_login_request() {
     tcpsock.recv_stream(httphandler);
 
     if (httphandler.get_status_code() != 200) {
-        throw pcom::Errors("Wrong username credentials.");
+        throw pcom::Errors("Wrong user credentials.");
     }
 
     session_cookie = httphandler.extract_cookies();
@@ -122,38 +122,38 @@ void pcom::Client::handle_get_books_request() {
     size_t books_count = books.size();
 
     if (books_count == 0) {
-        std::cout << GREEN_COLOR << "[OK] No books found in the library\n\n" << RESET_COLOR;
-    } else {
-        size_t books_to_print = 0;
+        throw pcom::Errors("No books found in the library");
+    }
 
-        bool is_invalid_number = true;
-        std::string dummy;
+    size_t books_to_print = 0;
 
-        while (is_invalid_number) {
-            std::cout << GREEN_COLOR << "How many books to print out of <" << books_count << ">? --> " << RESET_COLOR;
-            std::getline(std::cin, dummy);
+    bool is_invalid_number = true;
+    std::string dummy;
 
-            if ((!dummy.empty()) &&(dummy.find_first_not_of("0123456789") == std::string::npos)) {
-                std::stringstream stream(dummy);
+    while (is_invalid_number) {
+        std::cout << GREEN_COLOR << "How many books to print out of <" << books_count << ">? --> " << RESET_COLOR;
+        std::getline(std::cin, dummy);
 
-                stream >> books_to_print;
+        if ((!dummy.empty()) &&(dummy.find_first_not_of("0123456789") == std::string::npos)) {
+            std::stringstream stream(dummy);
 
-                if (books_to_print <= books_count) {
-                    is_invalid_number = false;
-                }
+            stream >> books_to_print;
+
+            if (books_to_print <= books_count) {
+                is_invalid_number = false;
             }
         }
+    }
 
-        if (books_to_print == 0) {
-            std::cout << GREEN_COLOR << "\n[OK] No book printed.\n\n" << RESET_COLOR;
-        } else {
-            std::cout << '\n';
-            for (size_t i = 0; i < books_to_print; ++i) {
-                auto& book = books[i];
-                std::cout << "Book No. " << (i + 1) << '\n';
-                std::cout << "  Title: " << book["title"] << '\n';
-                std::cout << "  Id: " << book["id"] << "\n\n";
-            }
+    if (books_to_print == 0) {
+        std::cout << GREEN_COLOR << "\n[OK] No book printed.\n\n" << RESET_COLOR;
+    } else {
+        std::cout << '\n';
+        for (size_t i = 0; i < books_to_print; ++i) {
+            auto& book = books[i];
+            std::cout << "Book No. " << (i + 1) << '\n';
+            std::cout << "  Title: " << book["title"] << '\n';
+            std::cout << "  Id: " << book["id"] << "\n\n";
         }
     }
 }
@@ -178,8 +178,7 @@ void pcom::Client::handle_get_book_request() {
     tcpsock.recv_stream(httphandler);
 
     if (httphandler.get_status_code() == 404) {
-        std::cout << GREEN_COLOR << "[OK] No book matches the id from the library.\n\n" << RESET_COLOR;
-        return;
+        throw pcom::Errors("No book matches the id from the library.");
     } else if (httphandler.get_status_code() != 200) {
         throw pcom::Errors("Library token is depricated on getting book.");
     }
@@ -192,6 +191,61 @@ void pcom::Client::handle_get_book_request() {
     std::cout << "  Publisher: " << book["publisher"] << '\n';
     std::cout << "  Genre: " << book["genre"] << '\n';
     std::cout << "  Page Count: " << book["page_count"] << "\n\n";
+}
+
+void pcom::Client::handle_add_book_request() {
+    if (!has_library_access) {
+        throw pcom::Errors("Client does not have access to the library.");
+    }
+
+    httphandler.clear();
+
+    httphandler
+        .set_host_url(urls[pcom::InputCommand::Command::ADD_BOOK])
+        .set_content_type("application/json")
+        .set_authorization(library_token)
+        .set_body(cmdhandler.get_command_body())
+        .generate_post_request();
+
+    tcpsock.open_connection();
+    tcpsock.send_stream(httphandler);
+    tcpsock.recv_stream(httphandler);
+
+    if (httphandler.get_status_code() == 400) {
+        throw pcom::Errors("Book info is not complete or do not follow the formatting.");
+    } else if (httphandler.get_status_code() != 200) {
+        throw pcom::Errors("Library token is depricated on adding book.");
+    }
+
+    std::cout << GREEN_COLOR << "[OK] Book was added in the library.\n\n" << RESET_COLOR;
+}
+
+void pcom::Client::handle_delete_book_request() {
+    if (!has_library_access) {
+        throw pcom::Errors("Client does not have access to the library.");
+    }
+
+    std::string book_id = std::to_string((int)cmdhandler.get_command_raw()["id"]);
+
+    httphandler.clear();
+
+    httphandler
+        .set_host_url(urls[pcom::InputCommand::Command::DELETE_BOOK] + book_id)
+        .set_content_type("application/json")
+        .set_authorization(library_token)
+        .generate_delete_request();
+
+    tcpsock.open_connection();
+    tcpsock.send_stream(httphandler);
+    tcpsock.recv_stream(httphandler);
+
+    if (httphandler.get_status_code() == 404) {
+        throw pcom::Errors("No book matches the id from the library.");
+    } else if (httphandler.get_status_code() != 200) {
+        throw pcom::Errors("Library token is depricated on getting book.");
+    }
+
+    std::cout << GREEN_COLOR << "[OK] Book was deleted from the library.\n\n" << RESET_COLOR;
 }
 
 void pcom::Client::handle_logout_request() {
@@ -250,15 +304,12 @@ void pcom::Client::start_session() {
                 case pcom::InputCommand::Command::GET_BOOK:
                     handle_get_book_request();
                     break;
-                // case pcom::InputCommand::Command::ADD_BOOK:
-                // case pcom::InputCommand::Command::DELETE_BOOK:
-                //     if (!has_library_access) {
-                //         throw pcom::Errors("Client has not access to the library.");
-                //     } else {
-
-                //     }
-
-                //     break;
+                case pcom::InputCommand::Command::ADD_BOOK:
+                    handle_add_book_request();
+                    break;
+                case pcom::InputCommand::Command::DELETE_BOOK:
+                    handle_delete_book_request();
+                    break;
                 case pcom::InputCommand::Command::LOGOUT:
                     handle_logout_request();
                     break;

@@ -20,7 +20,7 @@ SRC_FILES	:= $(wildcard $(SRC)/*.cpp)
 EXEC		:= 	main
 O_FILES		:= 	$(patsubst $(SRC)/%.cpp,%.o,$(SRC_FILES))
 
-all: $(EXEC)
+all: $(EXEC) clean_o
 
 %.o: $(SRC)/%.cpp
 	@$(CC) $(CFLAGS) -c $<
@@ -28,7 +28,7 @@ all: $(EXEC)
 $(EXEC): $(O_FILES)
 	@$(CC) $^ -o $@
 
-val: $(EXEC)
+val: $(EXEC) clean_o
 	@$(VALGRIND) $(VAL_FLAGS) ./$(EXEC)
 
 zip_project: $(ZIP_FILES)

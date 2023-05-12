@@ -33,6 +33,7 @@ class pcom::HttpHandler {
 
         HttpHandler& generate_get_request();
         HttpHandler& generate_post_request();
+        HttpHandler& generate_delete_request();
 
         int get_status_code();
         std::string extract_cookies();

@@ -12,7 +12,7 @@ void pcom::InputCommand::listen_for_command() {
     std::string input;
     std::getline(std::cin, input);
 
-    if (!is_word(input)) {
+    if (!is_plain_word(input)) {
         throw pcom::Errors("Invalid format for a command.");
     }
 
@@ -44,8 +44,17 @@ bool pcom::InputCommand::is_number(const std::string& str) {
     return !str.empty() && str.find_first_not_of("0123456789") == std::string::npos;
 }
 
-bool pcom::InputCommand::is_word(const std::string& str) {
-    return !str.empty() && str.find_first_of("0123456789\n ") == std::string::npos;
+bool pcom::InputCommand::is_plain_word(const std::string& str) {
+    return !str.empty() && str.find_first_not_of(
+        "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM_-."
+    ) == std::string::npos;
+}
+
+bool pcom::InputCommand::is_text(const std::string& str) {
+    return !str.empty() &&
+    str.find_first_not_of(
+        "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789._-+<>/|;:!?`~[]{}() "
+    ) == std::string::npos;
 }
 
 void pcom::InputCommand::parse_command(std::string command) {
@@ -84,8 +93,9 @@ void pcom::InputCommand::handle_register_cmd() {
     std::cout << GREEN_COLOR << "username=" << RESET_COLOR;
     std::getline(std::cin, input);
 
-    if (!is_word(input)) {
-        throw pcom::Errors("Register with numeric or empty username field.");
+    if (!is_plain_word(input)) {
+        std::cout << '\n';
+        throw pcom::Errors("Invalid format for username.");
     }
 
     body["username"] = input;
@@ -93,8 +103,9 @@ void pcom::InputCommand::handle_register_cmd() {
     std::cout << GREEN_COLOR << "password=" << RESET_COLOR;
     std::getline(std::cin, input);
 
-    if (!is_word(input)) {
-        throw pcom::Errors("Register with numeric or empty password field.");
+    if (!is_plain_word(input)) {
+        std::cout << '\n';
+        throw pcom::Errors("Invalid format for password.");
     }
 
     body["password"] = input;
@@ -110,8 +121,9 @@ void pcom::InputCommand::handle_login_cmd() {
     std::cout << GREEN_COLOR << "username=" << RESET_COLOR;
     std::getline(std::cin, input);
 
-    if (!is_word(input)) {
-        throw pcom::Errors("Login with numeric or empty username field.");
+    if (!is_plain_word(input)) {
+        std::cout << '\n';
+        throw pcom::Errors("Invalid format for username.");
     }
 
     body["username"] = input;
@@ -119,8 +131,9 @@ void pcom::InputCommand::handle_login_cmd() {
     std::cout << GREEN_COLOR << "password=" << RESET_COLOR;
     std::getline(std::cin, input);
 
-    if (!is_word(input)) {
-        throw pcom::Errors("Login with numeric or empty password field.");
+    if (!is_plain_word(input)) {
+        std::cout << '\n';
+        throw pcom::Errors("Invalid format for password.");
     }
 
     body["password"] = input;
@@ -149,6 +162,7 @@ void pcom::InputCommand::handle_get_book_cmd() {
     std::getline(std::cin, input);
 
     if (!is_number(input)) {
+        std::cout << '\n';
         throw pcom::Errors("Get book id is not a number.");
     }
 
@@ -170,8 +184,9 @@ void pcom::InputCommand::handle_add_book_cmd() {
     std::cout << GREEN_COLOR << "title=" << RESET_COLOR;
     std::getline(std::cin, input);
 
-    if (!is_word(input)) {
-        throw pcom::Errors("Add book with numeric or empty title.");
+    if (!is_text(input)) {
+        std::cout << '\n';
+        throw pcom::Errors("Invalid format for book title.");
     }
 
     body["title"] = input;
@@ -179,8 +194,9 @@ void pcom::InputCommand::handle_add_book_cmd() {
     std::cout << GREEN_COLOR << "author=" << RESET_COLOR;
     std::getline(std::cin, input);
 
-    if (!is_word(input)) {
-        throw pcom::Errors("Add book with numeric or empty author.");
+    if (!is_text(input)) {
+        std::cout << '\n';
+        throw pcom::Errors("Invalid format for book author.");
     }
 
     body["author"] = input;
@@ -188,8 +204,9 @@ void pcom::InputCommand::handle_add_book_cmd() {
     std::cout << GREEN_COLOR << "genre=" << RESET_COLOR;
     std::getline(std::cin, input);
 
-    if (!is_word(input)) {
-        throw pcom::Errors("Add book with numeric or empty genre.");
+    if (!is_text(input)) {
+        std::cout << '\n';
+        throw pcom::Errors("Invalid format for book genre.");
     }
 
     body["genre"] = input;
@@ -197,8 +214,9 @@ void pcom::InputCommand::handle_add_book_cmd() {
     std::cout << GREEN_COLOR << "publisher=" << RESET_COLOR;
     std::getline(std::cin, input);
 
-    if (!is_word(input)) {
-        throw pcom::Errors("Add book with numeric or empty publisher.");
+    if (!is_text(input)) {
+        std::cout << '\n';
+        throw pcom::Errors("Invalid format for book publisher.");
     }
 
     body["publisher"] = input;
@@ -207,7 +225,8 @@ void pcom::InputCommand::handle_add_book_cmd() {
     std::getline(std::cin, input);
 
     if (!is_number(input)) {
-        throw pcom::Errors("Add book page count is not a number.");
+        std::cout << '\n';
+        throw pcom::Errors("Book id is not a number.");
     }
 
     std::stringstream stream(input);
@@ -229,7 +248,8 @@ void pcom::InputCommand::handle_delete_book_cmd() {
     std::getline(std::cin, input);
 
     if (!is_number(input)) {
-        throw pcom::Errors("Delete book id is not a number.");
+        std::cout << '\n';
+        throw pcom::Errors("Book id is not a number.");
     }
 
     std::stringstream stream(input);

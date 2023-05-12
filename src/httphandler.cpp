@@ -104,6 +104,29 @@ pcom::HttpHandler& pcom::HttpHandler::generate_post_request() {
     return *this;
 }
 
+pcom::HttpHandler& pcom::HttpHandler::generate_delete_request() {
+    if ((host_url.empty()) || (host_ip.empty()) || (content_type.empty())) {
+        throw pcom::Errors("Could not generate DELETE request because of null fields.");
+    }
+
+    header = "DELETE " + host_url + " HTTP/1.1\r\n";
+    header += "Host: " + host_ip + "\r\n" + "Content-Type: " + content_type + "\r\n";
+    
+    if (!token.empty()) {
+        header += "Authorization: Bearer " + token + "\r\n";
+    }
+
+    if (!cookies.empty()) {
+        header += "Cookie: " + cookies + "\r\n";
+    }
+
+    header += "\r\n";
+
+    header_complete = true;
+
+    return *this;
+}
+
 int pcom::HttpHandler::get_status_code() {
     if (!header_complete) {
         throw pcom::Errors("Header is not complete for reading status.");

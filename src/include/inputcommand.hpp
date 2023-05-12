@@ -35,7 +35,8 @@ class pcom::InputCommand {
         Command type;
 
         bool is_number(const std::string& str);
-        bool is_word(const std::string& str);
+        bool is_plain_word(const std::string& str);
+        bool is_text(const std::string& str);
 
         void parse_command(std::string command);
 
