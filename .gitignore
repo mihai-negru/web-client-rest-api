@@ -3,3 +3,4 @@ build
 main
 .vscode
 test.txt
+*.zip

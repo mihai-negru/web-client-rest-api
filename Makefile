@@ -10,7 +10,7 @@ RM			:= 	rm
 RFLAGS		:= 	-rf
 
 ZIP			:=	zip
-ZIP_NAME	:=	323CD_Negru_Mihai_Tema3.zip
+ZIP_NAME	:=	Negru_Mihai_323CD_Tema3PC.zip
 ZIP_FLAGS	:= -r
 ZIP_FILES	:= 	src/ Makefile README.md
 
